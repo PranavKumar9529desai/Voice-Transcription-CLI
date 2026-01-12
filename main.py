@@ -1,36 +1,51 @@
 import argparse
 import sys
 import time
+import threading
 from pynput import keyboard
 from recorder import Recorder
 from transcriber import Transcriber
 from typer import Typer
+from feedback import Feedback
 
 class VoiceTranscriptionCLI:
     def __init__(self, model_size="base", hotkey=keyboard.Key.f8):
         self.recorder = Recorder()
         self.transcriber = Transcriber(model_size=model_size)
         self.typer = Typer()
+        self.feedback = Feedback()
         self.hotkey = hotkey
         self.is_recording = False
+        self.processing_lock = threading.Lock()
 
     def on_press(self, key):
         if key == self.hotkey and not self.is_recording:
-            self.is_recording = True
-            print("\nRecording... (release key to stop)")
-            self.recorder.start()
+            with self.processing_lock:
+                self.is_recording = True
+                print("\nRecording... (release key to stop)")
+                self.feedback.notify("🎙️ Recording...")
+                self.recorder.start()
 
     def on_release(self, key):
         if key == self.hotkey and self.is_recording:
-            self.is_recording = False
-            audio_data = self.recorder.stop()
-            print("Processing transcription...")
-            text = self.transcriber.transcribe(audio_data)
-            if text:
-                print(f"Transcribed: {text}")
-                self.typer.type_text(text)
-            else:
-                print("No speech detected.")
+            with self.processing_lock:
+                self.is_recording = False
+                audio_data = self.recorder.stop()
+                print("Processing transcription...")
+                
+                # Run transcription in a separate thread to not block the listener
+                threading.Thread(target=self._process_and_type, args=(audio_data,), daemon=True).start()
+
+    def _process_and_type(self, audio_data):
+        text = self.transcriber.transcribe(audio_data)
+        if text:
+            print(f"Transcribed: {text}")
+            self.typer.type_text(text)
+            self.feedback.notify(f"✅ Transcribed: {text[:30]}...")
+            self.feedback.play_beep()
+        else:
+            print("No speech detected.")
+            self.feedback.notify("🔇 No speech detected.")
 
     def run(self):
         print(f"Voice Transcription CLI started.")
@@ -54,7 +69,6 @@ def main():
     # Map string key names to pynput Key attributes
     hotkey = getattr(keyboard.Key, args.key, None)
     if not hotkey:
-        # Check if it's a single character
         if len(args.key) == 1:
             hotkey = keyboard.KeyCode.from_char(args.key)
         else:
