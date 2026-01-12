@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Voice Transcription CLI
+Comment=Push-To-Talk Voice Transcription
+Exec=/home/pranav/.local/bin/uv run main.py
+Path=/home/pranav/Projects/voice-transcription-cli
+Terminal=false
+X-GNOME-Autostart-enabled=true

@@ -3,7 +3,7 @@ import ctranslate2
 import logging
 
 class Transcriber:
-    def __init__(self, model_size="distil-large-v3", device=None, compute_type="float16"):
+    def __init__(self, model_size="distil-large-v3", device=None, compute_type="int8_float16"):
         if device is None:
             # Auto-detect CUDA
             if ctranslate2.get_cuda_device_count() > 0:

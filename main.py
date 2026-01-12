@@ -1,7 +1,22 @@
 import os
 import sys
 import argparse
+import fcntl
 from pynput import keyboard
+
+LOCK_FILE = "/tmp/voice-transcription.lock"
+
+def ensure_single_instance():
+    """Prevent multiple instances from running simultaneously."""
+    global lock_file_handle
+    lock_file_handle = open(LOCK_FILE, "wb")
+    try:
+        # Try to acquire an exclusive lock without blocking
+        fcntl.flock(lock_file_handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except IOError:
+        print("\n[!] Error: Another instance of Voice Transcription CLI is already running.")
+        print(f"[!] Check for background processes or remove {LOCK_FILE} if no process exists.")
+        sys.exit(1)
 
 def bootstrap():
     """Ensure CUDA libraries are in the LD_LIBRARY_PATH and restart if necessary."""
@@ -37,6 +52,7 @@ def bootstrap():
 
 if __name__ == "__main__":
     # Must be first
+    ensure_single_instance()
     bootstrap()
     
     from recorder import Recorder
