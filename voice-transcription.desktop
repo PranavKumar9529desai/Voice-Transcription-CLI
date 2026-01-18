@@ -6,3 +6,6 @@ Exec=/home/pranav/.local/bin/uv run main.py
 Path=/home/pranav/Projects/voice-transcription-cli
 Terminal=false
 X-GNOME-Autostart-enabled=true
+
+
+ 
