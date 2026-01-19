@@ -9,6 +9,7 @@ dependencies = [
     "numpy>=2.4.1",
     "nvidia-cublas-cu12>=12.9.1.4",
     "nvidia-cudnn-cu12>=9.17.1.4",
+    "PyGObject>=3.50.0",
     "pynput>=1.8.1",
     "scipy>=1.17.0",
     "sounddevice>=0.5.3",

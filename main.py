@@ -62,8 +62,30 @@ if __name__ == "__main__":
     import threading
 
     class VoiceTranscriptionCLI:
-        def __init__(self, model_size="distil-large-v3", hotkey=keyboard.Key.f8):
-            self.recorder = Recorder()
+        def __init__(self, model_size="distil-large-v3", hotkey=keyboard.Key.f8, enable_ui=True):
+            self.enable_ui = enable_ui
+            self.floating_ui = None
+            
+            # Initialize UI first if enabled
+            if self.enable_ui:
+                try:
+                    from ui import FloatingWindow
+                    self.floating_ui = FloatingWindow()
+                    self.floating_ui.start()
+                    print("Floating UI initialized")
+                except ImportError as e:
+                    print(f"Warning: Could not load UI ({e}). Running without floating window.")
+                    self.floating_ui = None
+                except Exception as e:
+                    print(f"Warning: UI initialization failed ({e}). Running without floating window.")
+                    self.floating_ui = None
+            
+            # Create amplitude callback for UI updates
+            def on_amplitude(amp):
+                if self.floating_ui:
+                    self.floating_ui.update_amplitude(amp)
+            
+            self.recorder = Recorder(on_amplitude=on_amplitude if self.floating_ui else None)
             self.transcriber = Transcriber(model_size=model_size)
             self.typer = Typer()
             self.feedback = Feedback()
@@ -77,6 +99,11 @@ if __name__ == "__main__":
                     self.is_recording = True
                     print("\nRecording... (release key to stop)")
                     self.feedback.notify("🎙️ Recording...")
+                    
+                    # Show floating UI
+                    if self.floating_ui:
+                        self.floating_ui.show()
+                    
                     self.recorder.start()
 
         def on_release(self, key):
@@ -84,6 +111,11 @@ if __name__ == "__main__":
                 with self.processing_lock:
                     self.is_recording = False
                     audio_data = self.recorder.stop()
+                    
+                    # Hide floating UI
+                    if self.floating_ui:
+                        self.floating_ui.hide()
+                    
                     print("Processing transcription...")
                     threading.Thread(target=self._process_and_type, args=(audio_data,), daemon=True).start()
 
@@ -101,18 +133,25 @@ if __name__ == "__main__":
         def run(self):
             print(f"Voice Transcription CLI started.")
             print(f"Hotkey: {self.hotkey}")
+            if self.floating_ui:
+                print("Floating UI: Enabled")
+            else:
+                print("Floating UI: Disabled")
             print("Press Ctrl+C to exit.")
             with keyboard.Listener(on_press=self.on_press, on_release=self.on_release) as listener:
                 try:
                     listener.join()
                 except KeyboardInterrupt:
                     print("\nExiting...")
+                    if self.floating_ui:
+                        self.floating_ui.stop()
                     sys.exit(0)
 
     def main():
         parser = argparse.ArgumentParser(description="Voice Transcription CLI with PTT")
         parser.add_argument("--model", type=str, default="distil-large-v3", help="Whisper model size")
         parser.add_argument("--key", type=str, default="f8", help="Hotkey for PTT")
+        parser.add_argument("--no-ui", action="store_true", help="Disable floating UI window")
         args = parser.parse_args()
 
         hotkey = getattr(keyboard.Key, args.key, None)
@@ -123,7 +162,12 @@ if __name__ == "__main__":
                 print(f"Error: Unknown key '{args.key}'")
                 sys.exit(1)
 
-        app = VoiceTranscriptionCLI(model_size=args.model, hotkey=hotkey)
+        app = VoiceTranscriptionCLI(
+            model_size=args.model, 
+            hotkey=hotkey,
+            enable_ui=not args.no_ui
+        )
         app.run()
 
     main()
+
