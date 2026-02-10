@@ -1,0 +1,200 @@
+{
+  "patterns": [
+    {
+      "pattern": "\\bshad\\s*(cn|seen|can|scene|si|c n|c-n)\\b",
+      "replacement": "ShadCN",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bclod\\s*code\\b",
+      "replacement": "Claude Code",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bclawed\\b",
+      "replacement": "Claude",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\btail\\s*wind\\b",
+      "replacement": "Tailwind",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\btype\\s*script\\b",
+      "replacement": "TypeScript",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bnext\\s*js\\b",
+      "replacement": "Next.js",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\breact\\s*query\\b",
+      "replacement": "React Query",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bgit\\s*hub\\b",
+      "replacement": "GitHub",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bgit\\s*lab\\b",
+      "replacement": "GitLab",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bvs\\s*code\\b",
+      "replacement": "VS Code",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bpost\\s*gres\\b",
+      "replacement": "PostgreSQL",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bmongo\\s*db\\b",
+      "replacement": "MongoDB",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bgraph\\s*ql\\b",
+      "replacement": "GraphQL",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bnode\\s*js\\b",
+      "replacement": "Node.js",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bview\\s*js\\b",
+      "replacement": "Vue.js",
+      "case_sensitive": false
+    },
+    {
+      "pattern": "\\bangular\\s*js\\b",
+      "replacement": "Angular.js",
+      "case_sensitive": false
+    }
+  ],
+  "exact_matches": {
+    "geminy": "Gemini",
+    "gemeni": "Gemini",
+    "jemini": "Gemini",
+    "shad seen": "ShadCN",
+    "shad can": "ShadCN",
+    "shad scene": "ShadCN",
+    "shad-c-n": "ShadCN",
+    "shad c n": "ShadCN",
+    "shadcn": "ShadCN",
+    "clawed": "Claude",
+    "clod code": "Claude Code",
+    "clod": "Claude",
+    "tail wind": "Tailwind",
+    "tailwind": "Tailwind",
+    "type script": "TypeScript",
+    "typescript": "TypeScript",
+    "java script": "JavaScript",
+    "javascript": "JavaScript",
+    "next js": "Next.js",
+    "nextjs": "Next.js",
+    "react query": "React Query",
+    "github": "GitHub",
+    "git hub": "GitHub",
+    "gitlab": "GitLab",
+    "git lab": "GitLab",
+    "vscode": "VS Code",
+    "vs code": "VS Code",
+    "visual studio code": "VS Code",
+    "postgres": "PostgreSQL",
+    "post gres": "PostgreSQL",
+    "postgresql": "PostgreSQL",
+    "mongo": "MongoDB",
+    "mongodb": "MongoDB",
+    "mongo db": "MongoDB",
+    "graphql": "GraphQL",
+    "graph ql": "GraphQL",
+    "nodejs": "Node.js",
+    "node js": "Node.js",
+    "vuejs": "Vue.js",
+    "view js": "Vue.js",
+    "angularjs": "Angular.js",
+    "angular js": "Angular.js",
+    "docker": "Docker",
+    "kubernetes": "Kubernetes",
+    "coubernetes": "Kubernetes",
+    "k8s": "Kubernetes",
+    "redis": "Redis",
+    "read is": "Redis",
+    "api": "API",
+    "a p i": "API",
+    "rest api": "REST API",
+    "json": "JSON",
+    "jay sun": "JSON",
+    "jason": "JSON",
+    "yaml": "YAML",
+    "yml": "YAML",
+    "vercel": "Vercel",
+    "ver cell": "Vercel",
+    "netlify": "Netlify",
+    "net lift": "Netlify",
+    "supabase": "Supabase",
+    "super base": "Supabase",
+    "firebase": "Firebase",
+    "fire base": "Firebase",
+    "aws": "AWS",
+    "amazon web services": "AWS",
+    "gcp": "GCP",
+    "azure": "Azure",
+    "azure": "Azure",
+    "prettier": "Prettier",
+    "pretty er": "Prettier",
+    "eslint": "ESLint",
+    "es lint": "ESLint",
+    "webpack": "Webpack",
+    "web pack": "Webpack",
+    "vite": "Vite",
+    "veet": "Vite",
+    "redux": "Redux",
+    "re ducks": "Redux",
+    "zustand": "Zustand",
+    "zoo stand": "Zustand",
+    "prisma": "Prisma",
+    "prism a": "Prisma",
+    "drizzle": "Drizzle",
+    "jest": "Jest",
+    "jay test": "Jest",
+    "vitest": "Vitest",
+    "vee test": "Vitest",
+    "cypress": "Cypress",
+    "site press": "Cypress",
+    "playwright": "Playwright",
+    "play right": "Playwright",
+    "storybook": "Storybook",
+    "story book": "Storybook",
+    "figma": "Figma",
+    "fig ma": "Figma",
+    "notion": "Notion",
+    "linear": "Linear",
+    "jira": "Jira",
+    "gira": "Jira",
+    "trello": "Trello",
+    "trel low": "Trello",
+    "slack": "Slack",
+    "discord": "Discord",
+    "dis cord": "Discord",
+    "stackoverflow": "Stack Overflow",
+    "stack overflow": "Stack Overflow",
+    "chatgpt": "ChatGPT",
+    "chat gpt": "ChatGPT",
+    "chat gp t": "ChatGPT",
+    "copilot": "Copilot",
+    "co pilot": "Copilot",
+    "midjourney": "Midjourney",
+    "mid journey": "Midjourney"
+  }
+}
