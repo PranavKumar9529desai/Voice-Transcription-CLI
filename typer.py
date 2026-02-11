@@ -4,14 +4,11 @@ import time
 
 from pynput import keyboard
 
-# List of known terminal applications that typically require Ctrl+Shift+V
-# Note: "dev.zed.Zed" is ambiguous (Editor vs Terminal), so we don't force it here.
-# Users should use the Shift-Override for Zed's terminal.
-TERMINAL_APPS = {
-    "gnome-terminal-server",
-    "Gnome-terminal",
-    "dev.zed.Zed",
-}
+# List of keywords to identify terminal applications/editors that require Ctrl+Shift+V
+TERMINAL_KEYWORDS = [
+    "gnome-terminal",
+    "zed",
+]
 
 
 class Typer:
@@ -37,18 +34,23 @@ class Typer:
             self._type_x11(text, force_terminal)
 
     def _get_active_window_class(self):
-        """Get the class name of the active window using xdotool."""
+        """Get the class name of the active window using xprop (more reliable than xdotool)."""
         try:
             # Get active window ID
             window_id = subprocess.check_output(
                 ["xdotool", "getactivewindow"], text=True
             ).strip()
 
-            # Get window class name
-            window_class = subprocess.check_output(
-                ["xdotool", "getwindowclassname", window_id], text=True
+            # Get window class using xprop
+            # Output format: WM_CLASS(STRING) = "instance", "class"
+            output = subprocess.check_output(
+                ["xprop", "-id", window_id, "WM_CLASS"], text=True
             ).strip()
-            return window_class
+
+            # Extract the class string (handling quotes)
+            if '"' in output:
+                return output.split('"')[-2]
+            return output
         except (subprocess.CalledProcessError, FileNotFoundError):
             return None
 
@@ -73,9 +75,18 @@ class Typer:
             else:
                 # Check 2: Auto-Detection
                 active_class = self._get_active_window_class()
-                if active_class in TERMINAL_APPS:
+                is_terminal = False
+
+                if active_class:
+                    normalized_class = active_class.lower()
+                    if any(
+                        keyword in normalized_class for keyword in TERMINAL_KEYWORDS
+                    ):
+                        is_terminal = True
+
+                if is_terminal:
                     print(
-                        f"Paste Strategy: Detected Terminal ({active_class}) -> Ctrl+Shift+V"
+                        f"Paste Strategy: Detected Terminal/Zed ({active_class}) -> Ctrl+Shift+V"
                     )
                     paste_keys = "ctrl+shift+v"
                 else:
@@ -83,8 +94,10 @@ class Typer:
                         f"Paste Strategy: Default ({active_class or 'Unknown'}) -> Ctrl+V"
                     )
 
-            # 4. Paste using xdotool
-            subprocess.run(["xdotool", "key", paste_keys], check=True)
+            # 4. Paste using xdotool (with --clearmodifiers to prevent modifier sticking)
+            subprocess.run(
+                ["xdotool", "key", "--clearmodifiers", paste_keys], check=True
+            )
 
         except FileNotFoundError:
             print(
