@@ -5,7 +5,13 @@ A high-performance, low-latency Voice-to-Text CLI tool designed for Linux. This 
 ## 🚀 Key Features
 
 - **Push-to-Talk (PTT):** Simple hotkey-based recording (Default: `F8`). Hold to record, release to transcribe.
-- **Auto-Typing:** Integrated keyboard emulation automatically types transcribed text into any active window.
+- **Smart Typing (Context-Aware):** 
+  - Automatically detects if you are in a terminal (Gnome Terminal, Zed) and uses `Ctrl+Shift+V`.
+  - Uses `Ctrl+V` for standard apps (Browsers, Editors).
+  - **Manual Override:** Hold `Shift` while releasing the PTT key to **force** a terminal paste (useful for IDE terminals like Zed/VS Code).
+- **Audio Preprocessing (New):**
+  - **Normalization:** Automatically boosts quiet speech to standard levels.
+  - **Noise Filtering:** Band-pass filter (80Hz-8kHz) removes low rumble and high hiss.
 - **GPU Accelerated:** Optimized for NVIDIA GPUs using `CUDA`, `cuBLAS`, and `cuDNN` for near-instant processing.
 - **Smart Audio Processing:**
   - **Voice Activity Detection (VAD):** Intelligently filters out silence using `Silero VAD`.
@@ -49,7 +55,7 @@ python main.py
 | Argument | Description | Default |
 |----------|-------------|---------|
 | `--model` | Whisper model size (e.g., `base`, `medium`, `distil-large-v3`) | `distil-large-v3` |
-| `--key` | Hotkey for Push-to-Talk (e.g., `f8`, `f9`, `cmd_l`) | `f8` |
+| `--key` | Hotkey for PTT (e.g., `f8`, `f9`, `cmd_l`) | `f8` |
 
 Example with custom model and key:
 ```bash
@@ -69,7 +75,3 @@ For Linux users, a `voice-transcription.desktop` file is included to allow the t
 ## 📝 License
 
 MIT
-
-This is the new random file writing examination. So let's see if it's able to write in the school as well.
-Hello, hello, hello, this is the new output checking status.
-

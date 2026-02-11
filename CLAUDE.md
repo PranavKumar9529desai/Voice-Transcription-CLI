@@ -7,6 +7,8 @@ A high-performance, low-latency **Voice-to-Text CLI tool** for Linux that provid
 **Key Capabilities:**
 - Push-to-Talk recording with configurable hotkey (default: F8)
 - GPU-accelerated Whisper transcription using CTranslate2
+- **Context-Aware Typing:** Automatically detects terminals vs. GUI apps for correct pasting (Ctrl+V vs Ctrl+Shift+V)
+- **Audio Preprocessing:** Band-pass filtering and normalization for high-accuracy transcription
 - Automatic text injection into any active window
 - Real-time waveform visualization with floating UI
 - Voice Activity Detection (VAD) for intelligent silence filtering
@@ -30,7 +32,7 @@ A high-performance, low-latency **Voice-to-Text CLI tool** for Linux that provid
 1. **main.py** - Application entry point and orchestrator
    - Single-instance enforcement (file locking at `/tmp/voice-transcription.lock`)
    - CUDA library path bootstrapping (auto-restart with correct LD_LIBRARY_PATH)
-   - Hotkey listener and event coordination
+   - Hotkey listener (supports Shift-override for manual terminal pasting)
    - Threading for async transcription processing
 
 2. **recorder.py** - Audio capture module
@@ -38,24 +40,29 @@ A high-performance, low-latency **Voice-to-Text CLI tool** for Linux that provid
    - Real-time RMS amplitude calculation for UI feedback
    - Callback-based architecture for amplitude updates
 
-3. **transcriber.py** - Whisper transcription engine
+3. **preprocessor.py** - Audio signal processing
+   - Band-pass filter (80Hz - 8000Hz) to remove hum and hiss
+   - Signal normalization (boosts quiet speech to -1.0 dB)
+   - Improves transcription accuracy and prevents hallucinations
+
+4. **transcriber.py** - Whisper transcription engine
    - Auto-detects CUDA availability (falls back to CPU)
    - Uses distil-large-v3 model by default
    - Integrated Silero VAD with 500ms min silence duration
    - Beam search with size=5 for quality
 
-4. **typer.py** - Keyboard injection handler
+5. **typer.py** - Keyboard injection handler
    - Detects display server type (X11/Wayland)
-   - X11: Uses xclip + xdotool for clipboard-based pasting
-   - Wayland: Uses wl-copy + ydotool
+   - **X11 Context-Aware:** Detects active window class (Terminals/Zed use Ctrl+Shift+V, others Ctrl+V)
+   - **Manual Override:** Supports `force_terminal` flag (via Shift key)
    - Fallback to pynput Ctrl+V if tools unavailable
 
-5. **feedback.py** - User feedback system
+6. **feedback.py** - User feedback system
    - Desktop notifications via notify-send
    - Audio beep generation (880Hz sine wave at /tmp/transcription_beep.wav)
    - Non-blocking subprocess calls
 
-6. **ui/** - GTK4 floating window interface
+7. **ui/** - GTK4 floating window interface
    - **floating_window.py**: Frameless overlay with transparency
    - **waveform.py**: Cairo-based real-time waveform visualization (20 bars, 30 FPS)
    - **pop_shell.py**: GNOME Pop Shell integration for floating window exceptions
@@ -67,11 +74,12 @@ User holds hotkey (F8)
   → recorder.start() begins audio capture
   → Audio chunks → amplitude callback → UI waveform update
   
-User releases hotkey
+User releases hotkey [Optional: Hold Shift for Terminal Mode]
   → recorder.stop() returns audio data
+  → preprocessor.process() (Filter + Normalize)
   → Transcription thread spawned
   → Whisper model processes with VAD
-  → Text typed via clipboard + paste
+  → Text typed via clipboard (Ctrl+V or Ctrl+Shift+V)
   → Notification + beep feedback
 ```
 
@@ -81,6 +89,7 @@ User releases hotkey
 voice-transcription-cli/
 ├── main.py                    # Entry point and main app logic
 ├── recorder.py                # Audio recording with amplitude tracking
+├── preprocessor.py            # Audio filtering and normalization
 ├── transcriber.py             # Whisper model wrapper
 ├── typer.py                   # Keyboard injection (X11/Wayland)
 ├── feedback.py                # Notifications and audio feedback
@@ -138,7 +147,7 @@ Edit `voice-transcription.desktop` paths and copy to `~/.config/autostart/`
 ### Adding New Features
 
 1. **New Audio Processing:**
-   - Modify `recorder.py` for capture logic
+   - Modify `recorder.py` for capture or `preprocessor.py` for signal chain
    - Update amplitude callback signature if needed
    - Consider impact on UI updates
 
@@ -228,7 +237,7 @@ Edit `voice-transcription.desktop` paths and copy to `~/.config/autostart/`
 - [ ] History of transcriptions
 - [ ] Custom keybinding configuration UI
 - [ ] Tray icon for status indication
-- [ ] Audio preprocessing (noise reduction)
+- [x] Audio preprocessing (noise reduction)
 - [ ] Streaming transcription (real-time)
 - [ ] Model auto-download with progress bar
 - [ ] System-wide text expansion shortcuts
@@ -252,6 +261,8 @@ sounddevice >= 0.5.3          # Audio I/O
 **Current Branch:** `ui` (floating window development)
 
 **Recent Development:**
+- Context-Aware Typing (Ctrl+Shift+V support)
+- Audio Preprocessing (Noise reduction + Normalization)
 - UI implementation with GTK4
 - Pop Shell integration
 - Amplitude visualization

@@ -2,6 +2,7 @@ import argparse
 import fcntl
 import os
 import sys
+import threading
 
 from pynput import keyboard
 
@@ -66,10 +67,9 @@ if __name__ == "__main__":
     ensure_single_instance()
     bootstrap()
 
-    import threading
-
     from corrector import Corrector
     from feedback import Feedback
+    from preprocessor import AudioPreprocessor
     from recorder import Recorder
     from transcriber import Transcriber
     from typer import Typer
@@ -112,11 +112,18 @@ if __name__ == "__main__":
             self.corrector = Corrector()
             self.typer = Typer()
             self.feedback = Feedback()
+            self.preprocessor = AudioPreprocessor()
+
             self.hotkey = hotkey
             self.is_recording = False
+            self.shift_pressed = False
             self.processing_lock = threading.Lock()
 
         def on_press(self, key):
+            # Track shift state
+            if key == keyboard.Key.shift or key == keyboard.Key.shift_r:
+                self.shift_pressed = True
+
             if key == self.hotkey and not self.is_recording:
                 with self.processing_lock:
                     self.is_recording = True
@@ -130,10 +137,17 @@ if __name__ == "__main__":
                     self.recorder.start()
 
         def on_release(self, key):
+            # Track shift state
+            if key == keyboard.Key.shift or key == keyboard.Key.shift_r:
+                self.shift_pressed = False
+
             if key == self.hotkey and self.is_recording:
                 with self.processing_lock:
                     self.is_recording = False
                     audio_data = self.recorder.stop()
+
+                    # Capture shift state at moment of release for override
+                    force_terminal = self.shift_pressed
 
                     # Hide floating UI
                     if self.floating_ui:
@@ -141,16 +155,27 @@ if __name__ == "__main__":
 
                     print("Processing transcription...")
                     threading.Thread(
-                        target=self._process_and_type, args=(audio_data,), daemon=True
+                        target=self._process_and_type,
+                        args=(audio_data, force_terminal),
+                        daemon=True,
                     ).start()
 
-        def _process_and_type(self, audio_data):
-            text = self.transcriber.transcribe(audio_data)
+        def _process_and_type(self, audio_data, force_terminal=False):
+            # 1. Pre-process audio (Normalize + Bandpass)
+            processed_audio = self.preprocessor.process(audio_data)
+
+            # 2. Transcribe
+            text = self.transcriber.transcribe(processed_audio)
+
             if text:
+                # 3. Post-process text
                 corrected_text = self.corrector.correct(text)
-                print("Correct workds are", corrected_text)
                 print(f"Transcribed: {corrected_text}")
-                self.typer.type_text(corrected_text)
+
+                # 4. Type text with context awareness
+                # force_terminal comes from Shift key state on release
+                self.typer.type_text(corrected_text, force_terminal=force_terminal)
+
                 self.feedback.notify(f"✅ Transcribed: {corrected_text[:30]}...")
                 self.feedback.play_beep()
             else:
