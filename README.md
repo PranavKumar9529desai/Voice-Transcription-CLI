@@ -29,7 +29,9 @@ A high-performance, low-latency Voice-to-Text CLI tool designed for Linux. This 
 
 ## 📦 Installation
 
-Requirements: Python 3.12+, NVIDIA GPU (Recommended for speed).
+For a complete, step-by-step guide on setting up system dependencies (GTK4, Cairo, Clipboard tools), please read [INSTALL.md](INSTALL.md).
+
+**Quick Start:**
 
 1. **Clone the repository:**
    ```bash
@@ -41,6 +43,11 @@ Requirements: Python 3.12+, NVIDIA GPU (Recommended for speed).
    Using [uv](https://github.com/astral-sh/uv):
    ```bash
    uv sync
+   ```
+
+3. **Run:**
+   ```bash
+   uv run main.py
    ```
 
 ## ⌨️ Usage
