@@ -76,7 +76,7 @@ if __name__ == "__main__":
 
     class VoiceTranscriptionCLI:
         def __init__(
-            self, model_size="distil-large-v3", hotkey=keyboard.Key.f8, enable_ui=True
+            self, model_size="large-v3-turbo", hotkey=keyboard.Key.f8, enable_ui=True
         ):
             self.enable_ui = enable_ui
             self.floating_ui = None
@@ -179,7 +179,7 @@ if __name__ == "__main__":
     def main():
         parser = argparse.ArgumentParser(description="Voice Transcription CLI with PTT")
         parser.add_argument(
-            "--model", type=str, default="distil-large-v3", help="Whisper model size"
+            "--model", type=str, default="large-v3-turbo", help="Whisper model size"
         )
         parser.add_argument("--key", type=str, default="f8", help="Hotkey for PTT")
         parser.add_argument(
